@@ -55,31 +55,107 @@ Sword-Android/
 
 ## Build & Test Instructions
 
-### Prerequisites
-- JDK 17 (`openjdk-17-jdk`)
-- Android SDK Platform 35 & Build-Tools 35.0.0 (`local.properties` -> `sdk.dir=...`)
-- Python 3.10 (for Chaquopy build-time packaging)
+### Local Project Setup (Optional)
+You do **not** need to install Android Studio locally when building via GitHub Actions. For optional local CLI builds:
+- **JDK 17** (`openjdk-17-jdk` / Eclipse Temurin 17)
+- **Android SDK Platform 35** & **Build-Tools 35.0.0** (copy `local.properties.example` to `local.properties` and set `sdk.dir=...`)
+- **Python 3.10** (used at build time by Chaquopy 16.0.0; pass `-Psword.buildPython=/path/to/python3.10` if multiple Python versions are installed)
+
+Make the Gradle Wrapper executable on Linux/macOS if needed:
+```bash
+chmod +x ./gradlew
+```
 
 ### Run Unit Tests
 ```bash
-./gradlew testDebugUnitTest
+./gradlew testDebugUnitTest --no-daemon --max-workers=1 -Psword.buildPython=/usr/bin/python3.10
 ```
 
 ### Build Debug APK
 ```bash
-./gradlew assembleDebug
+./gradlew assembleDebug --no-daemon --max-workers=1 -Psword.buildPython=/usr/bin/python3.10
 ```
-Output APK: `app/build/outputs/apk/debug/app-debug.apk`
+- **APK Output Location**: `app/build/outputs/apk/debug/app-debug.apk`
+- **SHA-256 Checksum**: generated in CI at `app/build/outputs/apk/debug/app-debug.apk.sha256`
 
-### Release Build & Signing Procedure
-Release builds enable R8 code shrinking and resource shrinking (`isMinifyEnabled = true`, `isShrinkResources = true`).
-Do **not** commit `.jks` keystores or passwords to version control. Configure signing locally via `keystore.properties` or CI environment variables:
-1. Generate a release upload key using `keytool -genkeypair -v -keystore release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias sword-release`.
-2. Provide `KEYSTORE_PATH`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD` via secure CI secrets or an ignored `keystore.properties` file.
-3. Build the release bundle or APK with `./gradlew bundleRelease` or `./gradlew assembleRelease`.
+---
+
+## GitHub Actions Cloud Build (No Android Studio Required)
+
+This repository includes an automated workflow at `.github/workflows/android-build.yml` (**Sword Android CI Build**) that compiles and tests the native Android application on GitHub-hosted `ubuntu-latest` runners.
+
+### What the Workflow Does
+1. Checks out the repository and configures **JDK 17** (Temurin) and **Python 3.10**.
+2. Resolves and verifies the exact Python 3.10 executable path and passes it to Chaquopy via `-Psword.buildPython="$PYTHON310_BIN"`.
+3. Installs **Android SDK Platform 35**, **Build Tools 35.0.0**, and `platform-tools`.
+4. Enables Gradle caching via `gradle/actions/setup-gradle@v4` and limits memory usage with `--no-daemon --max-workers=1`.
+5. Runs `./gradlew testDebugUnitTest` (uploads `sword-android-unit-test-reports` automatically if any test fails).
+6. Builds the debug APK via `./gradlew assembleDebug`.
+7. Verifies `app/build/outputs/apk/debug/app-debug.apk` exists and is non-empty, generates `app-debug.apk.sha256`, and uploads both in the `sword-android-debug-apk` artifact.
+
+### How to Trigger a Build
+- **Automatic**: Push commits or open a Pull Request targeting `main` or `master`.
+- **Manual**:
+  1. Open your repository on GitHub and click the **Actions** tab.
+  2. Select **Sword Android CI Build** in the left sidebar.
+  3. Click **Run workflow**, choose your branch, and click **Run workflow**.
+
+### How to Download APK Artifacts
+1. Open the **Actions** tab and click the completed **Sword Android CI Build** run.
+2. Scroll down to the **Artifacts** section at the bottom of the summary page.
+3. Click **`sword-android-debug-apk`** to download the ZIP containing:
+   - `app-debug.apk`
+   - `app-debug.apk.sha256`
+4. Extract the ZIP and sideload `app-debug.apk` onto your Android device for testing.
+
+### SHA-256 Verification
+After extracting the downloaded artifact ZIP, verify the APK integrity against `app-debug.apk.sha256`:
+
+- **Linux / macOS**:
+  ```bash
+  sha256sum -c app-debug.apk.sha256
+  ```
+- **Windows (PowerShell)**:
+  ```powershell
+  Get-FileHash .\app-debug.apk -Algorithm SHA256
+  Get-Content .\app-debug.apk.sha256
+  ```
+  Confirm the computed hash matches the hex digest recorded in `app-debug.apk.sha256` (also printed in the workflow run's **Summary** tab).
+
+### How to Inspect Failed Builds
+1. Open the failed run in the GitHub **Actions** tab and click the **`Test & Build Debug APK`** job.
+2. Expand the step marked with a red **X** (e.g. `Run Debug Unit Tests` or `Build Debug APK`) to view the full compiler/Gradle error output.
+3. If unit tests failed, scroll to **Artifacts** and download **`sword-android-unit-test-reports`** (open `index.html` in a browser to inspect failing test stack traces).
+
+---
+
+## Future Release Signing Instructions
+
+> **Security Notice**: Debug APKs (`app-debug.apk`) are signed with an auto-generated debug key and are intended **for testing only**. Do **not** distribute debug-signed APKs publicly, and **never** commit `.jks` / `.keystore` files, keystore passwords, API secrets, or private credentials to version control.
+
+Release builds in `app/build.gradle.kts` already enable R8 code shrinking and resource shrinking (`isMinifyEnabled = true`, `isShrinkResources = true`). When you are ready to produce signed release builds via GitHub Actions:
+
+1. **Generate a private release keystore locally** (store it safely offline — never commit it):
+   ```bash
+   keytool -genkeypair -v -keystore sword-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias sword-release
+   ```
+2. **Base64-encode the keystore** for GitHub Secrets:
+   - Linux/macOS: `base64 -w 0 sword-release.jks` (macOS: `base64 -i sword-release.jks | tr -d '\n'`)
+   - Windows PowerShell: `[Convert]::ToBase64String([IO.File]::ReadAllBytes("sword-release.jks"))`
+3. **Add Encrypted Repository Secrets** in GitHub (**Settings -> Secrets and variables -> Actions -> New repository secret**):
+   - `ANDROID_KEYSTORE_BASE64` — Base64 string of `sword-release.jks`
+   - `ANDROID_KEYSTORE_PASSWORD` — Keystore password
+   - `ANDROID_KEY_ALIAS` — Key alias (e.g. `sword-release`)
+   - `ANDROID_KEY_PASSWORD` — Key password
+4. **Configure `signingConfigs` in `app/build.gradle.kts`** to read `KEYSTORE_PATH`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD` from environment variables (or an untracked `keystore.properties` file), then decode `ANDROID_KEYSTORE_BASE64` to a temporary runner file during the release workflow step and run:
+   ```bash
+   ./gradlew assembleRelease --no-daemon --max-workers=1 -Psword.buildPython="$PYTHON310_BIN"
+   ```
+   (or `./gradlew bundleRelease` for Play Store `.aab` bundles), deleting the decoded temporary keystore in an `if: always()` cleanup step.
 
 ---
 
 ## Legal & Authorized Use
 
 Sword Android is strictly intended for education, defensive diagnostics, and authorized security assessments against systems you own or have explicit permission to test.
+

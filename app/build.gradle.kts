@@ -81,6 +81,8 @@ chaquopy {
         val customBuildPython = providers.gradleProperty("sword.buildPython").orNull
         if (!customBuildPython.isNullOrBlank()) {
             buildPython(customBuildPython)
+        } else if (file("/usr/bin/python3.10").exists()) {
+            buildPython("/usr/bin/python3.10")
         } else if (file("/usr/bin/python3").exists()) {
             buildPython("/usr/bin/python3")
         }

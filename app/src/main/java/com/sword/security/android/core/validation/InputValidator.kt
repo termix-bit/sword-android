@@ -133,6 +133,9 @@ object InputValidator {
 
     fun validateHostOrIp(raw: String): String {
         val value = raw.trim()
+        if (value.equals("localhost", ignoreCase = true)) {
+            return "localhost"
+        }
         return try {
             validateIpAddress(value)
         } catch (_: ValidationException) {
@@ -166,7 +169,9 @@ object InputValidator {
         if (!uri.userInfo.isNullOrEmpty()) {
             throw ValidationException("Embedded URL credentials are not permitted")
         }
-        val host = uri.host ?: throw ValidationException("URL must include a valid host")
+        val host = (uri.host ?: throw ValidationException("URL must include a valid host"))
+            .removePrefix("[")
+            .removeSuffix("]")
         validateHostOrIp(host)
         if (uri.port != -1 && uri.port !in 1..65535) {
             throw ValidationException("URL port out of range")
@@ -211,7 +216,9 @@ object InputValidator {
         if (scheme !in listOf("http", "socks", "socks5")) {
             throw ValidationException("Proxy scheme must be http or socks5")
         }
-        val host = uri.host ?: throw ValidationException("Proxy URL must specify a host")
+        val host = (uri.host ?: throw ValidationException("Proxy URL must specify a host"))
+            .removePrefix("[")
+            .removeSuffix("]")
         validateHostOrIp(host)
         if (uri.port !in 1..65535) {
             throw ValidationException("Proxy URL must specify a valid port (1-65535)")
