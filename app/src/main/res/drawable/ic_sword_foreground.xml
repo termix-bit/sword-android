@@ -1,0 +1,53 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Circuit traces left -->
+    <path
+        android:pathData="M42,36 L34,36 L30,32 M42,45 L31,45 L27,49 M42,54 L33,54 L29,58 M44,74 L37,74 L34,77"
+        android:strokeWidth="1.6"
+        android:strokeColor="#00ADB5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:fillColor="#12D5E5"
+        android:pathData="M29,31 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0 M25.5,49 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0 M27.5,58 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0 M32.5,77 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0" />
+    <!-- Circuit traces right -->
+    <path
+        android:pathData="M66,36 L74,36 L78,32 M66,45 L77,45 L81,49 M66,54 L75,54 L79,58 M64,74 L71,74 L74,77"
+        android:strokeWidth="1.6"
+        android:strokeColor="#00ADB5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:fillColor="#12D5E5"
+        android:pathData="M76,31 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0 M79.5,49 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0 M77.5,58 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0 M72.5,77 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0" />
+    <!-- Digital Sword Blade -->
+    <path
+        android:fillColor="#12D5E5"
+        android:pathData="M54,18 L62,28 L62,62 L46,62 L46,28 Z" />
+    <path
+        android:fillColor="#071C2E"
+        android:pathData="M54,23 L54,60 L58,60 L58,29 Z"
+        android:fillAlpha="0.35" />
+    <path
+        android:pathData="M54,21 L54,61"
+        android:strokeWidth="1.4"
+        android:strokeColor="#F0F6FC"
+        android:strokeLineCap="round" />
+    <!-- Crossguard -->
+    <path
+        android:fillColor="#00ADB5"
+        android:pathData="M36,63 L72,63 L75,66.5 L72,70 L36,70 L33,66.5 Z" />
+    <path
+        android:fillColor="#12D5E5"
+        android:pathData="M54,61 L59.5,66.5 L54,72 L48.5,66.5 Z" />
+    <!-- Grip & Pommel -->
+    <path
+        android:fillColor="#12D5E5"
+        android:pathData="M50.5,72 L57.5,72 L57.5,83 L50.5,83 Z" />
+    <path
+        android:fillColor="#00ADB5"
+        android:pathData="M54,83 L58.5,87.5 L54,92 L49.5,87.5 Z" />
+</vector>

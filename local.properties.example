@@ -1,0 +1,13 @@
+## Example local.properties for Sword Android
+## Android Studio automatically generates local.properties when opening the project.
+## If building from CLI before opening in Android Studio, copy this file to
+## "local.properties" and uncomment the line matching your OS:
+
+# Windows (default Android Studio SDK location - escape backslashes and colons):
+# sdk.dir=C\:\\Users\\YOUR_USERNAME\\AppData\\Local\\Android\\Sdk
+
+# macOS:
+# sdk.dir=/Users/YOUR_USERNAME/Library/Android/sdk
+
+# Linux:
+# sdk.dir=/home/YOUR_USERNAME/Android/Sdk

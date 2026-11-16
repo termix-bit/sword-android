@@ -1,0 +1,11 @@
+<resources>
+    <color name="sword_background">#101820</color>
+    <color name="sword_deep_navy">#071C2E</color>
+    <color name="sword_card_surface">#121F2D</color>
+    <color name="sword_primary_cyan">#12D5E5</color>
+    <color name="sword_secondary_turquoise">#00ADB5</color>
+    <color name="sword_text_primary">#F0F6FC</color>
+    <color name="sword_text_secondary">#AAB4C0</color>
+    <color name="sword_border">#243747</color>
+    <color name="ic_launcher_background">#071C2E</color>
+</resources>
