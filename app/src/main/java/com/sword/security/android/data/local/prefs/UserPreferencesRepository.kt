@@ -22,7 +22,8 @@ data class UserPreferences(
     val maxConcurrency: Int = 4,
     val proxyUrl: String = "",
     val dohProvider: String = "Cloudflare",
-    val languageCode: String = "en"
+    val languageCode: String = "en",
+    val themeMode: String = "dark"
 )
 
 class UserPreferencesRepository(private val context: Context) {
@@ -36,6 +37,7 @@ class UserPreferencesRepository(private val context: Context) {
         val PROXY_URL = stringPreferencesKey("proxy_url")
         val DOH_PROVIDER = stringPreferencesKey("doh_provider")
         val LANGUAGE_CODE = stringPreferencesKey("language_code")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
     }
 
     val preferencesFlow: Flow<UserPreferences> = context.swordDataStore.data.map { prefs ->
@@ -47,7 +49,8 @@ class UserPreferencesRepository(private val context: Context) {
             maxConcurrency = (prefs[Keys.MAX_CONCURRENCY] ?: 4).coerceIn(1, 8),
             proxyUrl = prefs[Keys.PROXY_URL] ?: "",
             dohProvider = prefs[Keys.DOH_PROVIDER] ?: "Cloudflare",
-            languageCode = prefs[Keys.LANGUAGE_CODE] ?: "en"
+            languageCode = prefs[Keys.LANGUAGE_CODE] ?: "en",
+            themeMode = prefs[Keys.THEME_MODE] ?: "dark"
         )
     }
 
@@ -84,6 +87,11 @@ class UserPreferencesRepository(private val context: Context) {
     suspend fun setLanguageCode(code: String) {
         val safe = if (code in listOf("en", "fa")) code else "en"
         context.swordDataStore.edit { it[Keys.LANGUAGE_CODE] = safe }
+    }
+
+    suspend fun setThemeMode(mode: String) {
+        val safe = if (mode in listOf("dark", "light", "system")) mode else "dark"
+        context.swordDataStore.edit { it[Keys.THEME_MODE] = safe }
     }
 
     suspend fun resetDefaults() {

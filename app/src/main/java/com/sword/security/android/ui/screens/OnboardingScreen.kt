@@ -27,18 +27,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sword.security.android.core.i18n.SwordStrings
 import com.sword.security.android.ui.components.SwordCard
 import com.sword.security.android.ui.components.SwordCircuitBackdrop
 import com.sword.security.android.ui.components.SwordLogoBadge
-import com.sword.security.android.ui.theme.SwordDeepNavy
-import com.sword.security.android.ui.theme.SwordPrimaryCyan
-import com.sword.security.android.ui.theme.SwordTextPrimary
-import com.sword.security.android.ui.theme.SwordTextSecondary
+import com.sword.security.android.ui.theme.LocalSwordColors
 
 @Composable
 fun OnboardingScreen(
+    languageCode: String = "en",
     onGetStarted: () -> Unit
 ) {
+    val swordColors = LocalSwordColors.current
+    val isFa = SwordStrings.isPersian(languageCode)
+
     SwordCircuitBackdrop {
         Column(
             modifier = Modifier
@@ -55,33 +57,46 @@ fun OnboardingScreen(
                 style = MaterialTheme.typography.displaySmall.copy(
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 5.sp
-                )
+                ),
+                color = swordColors.textPrimary
             )
             Text(
-                text = "Android Security Toolkit",
+                text = SwordStrings.label("app_subtitle", languageCode),
                 style = MaterialTheme.typography.titleMedium,
-                color = SwordPrimaryCyan
+                color = swordColors.accent
             )
             Text(
-                text = "Independent native Android diagnostic, OSINT, cryptography, and forensics toolkit built with Android-first security boundaries.",
+                text = SwordStrings.label("home_hero_desc", languageCode),
                 style = MaterialTheme.typography.bodyMedium,
-                color = SwordTextSecondary
+                color = swordColors.textSecondary
             )
 
             OnboardingPillarCard(
                 icon = Icons.Default.Security,
-                title = "Native Android Architecture",
-                body = "No Termux wrapper or root requirement. Uses Android ConnectivityManager, WifiManager, SAF, ExifInterface, DoH, and TLS APIs."
+                title = if (isFa) "اجرای بومی بدون نیاز به روت" else "Native Android Architecture",
+                body = if (isFa) {
+                    "بدون نیاز به Termux یا دسترسی روت. بررسی شبکه، وب، وای‌فای و فایل‌ها با APIهای استاندارد اندروید."
+                } else {
+                    "No Termux wrapper or root requirement. Uses native Android Connectivity, Wifi, SAF, Exif, DoH, and TLS APIs."
+                }
             )
             OnboardingPillarCard(
                 icon = Icons.Default.Terminal,
-                title = "Bundled Python 3.10 Runtime",
-                body = "Selective Sword logic (such as the WhatsMyName username OSINT engine) runs safely inside the APK via Chaquopy without extra installs."
+                title = if (isFa) "موتور پایتون ۳.۱۰ داخل برنامه" else "Bundled Python 3.10 Runtime",
+                body = if (isFa) {
+                    "برخی تحلیل‌ها (مانند بررسی نام کاربری OSINT) به‌صورت ایمن و بدون نیاز به نصب اضافی با پایتون داخلی اجرا می‌شوند."
+                } else {
+                    "Selective Sword modules (such as username OSINT checks) run safely inside the APK via Chaquopy without extra installs."
+                }
             )
             OnboardingPillarCard(
                 icon = Icons.Default.Shield,
-                title = "Authorized Use Only",
-                body = "Use Sword only on devices, domains, and networks you own or have explicit permission to assess. Unsupported raw-packet or offensive tools are excluded."
+                title = if (isFa) "فقط برای اهداف مجاز" else "Authorized Use Only",
+                body = if (isFa) {
+                    "فقط دستگاه‌ها، دامنه‌ها و شبکه‌هایی را بررسی کنید که مالک آن هستید یا اجازه صریح دارید."
+                } else {
+                    "Use Sword only on devices, domains, and networks you own or have explicit permission to assess."
+                }
             )
 
             Spacer(Modifier.height(8.dp))
@@ -91,16 +106,13 @@ fun OnboardingScreen(
                     .fillMaxWidth()
                     .height(52.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = SwordPrimaryCyan,
-                    contentColor = SwordDeepNavy
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 Text(
-                    text = "Acknowledge & Enter Toolkit",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = SwordDeepNavy,
-                        fontWeight = FontWeight.Bold
-                    )
+                    text = if (isFa) "تأیید و ورود به برنامه" else "Acknowledge & Enter Toolkit",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
             }
         }
@@ -113,17 +125,18 @@ private fun OnboardingPillarCard(
     title: String,
     body: String
 ) {
+    val swordColors = LocalSwordColors.current
     SwordCard {
         Row(verticalAlignment = Alignment.Top) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = SwordPrimaryCyan
+                tint = swordColors.accent
             )
             Spacer(Modifier.width(12.dp))
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(title, style = MaterialTheme.typography.titleMedium, color = SwordTextPrimary)
-                Text(body, style = MaterialTheme.typography.bodyMedium, color = SwordTextSecondary)
+                Text(title, style = MaterialTheme.typography.titleMedium, color = swordColors.textPrimary)
+                Text(body, style = MaterialTheme.typography.bodyMedium, color = swordColors.textSecondary)
             }
         }
     }

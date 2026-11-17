@@ -17,7 +17,7 @@ class NavigationTest {
         composeRule.waitUntil(timeoutMillis = 5_000) {
             composeRule.onAllNodes(androidx.compose.ui.test.hasText("Acknowledge & Enter Toolkit"))
                 .fetchSemanticsNodes().isNotEmpty() ||
-                composeRule.onAllNodes(androidx.compose.ui.test.hasText("Quick Actions"))
+                composeRule.onAllNodes(androidx.compose.ui.test.hasText("Quick Checks"))
                     .fetchSemanticsNodes().isNotEmpty()
         }
 
@@ -29,8 +29,8 @@ class NavigationTest {
             composeRule.onNodeWithText("Acknowledge & Enter Toolkit").performClick()
         }
 
-        composeRule.onNodeWithText("Quick Actions").assertIsDisplayed()
-        composeRule.onNodeWithText("Modules").performClick()
-        composeRule.onNodeWithText("Modules Explorer").assertIsDisplayed()
+        composeRule.onNodeWithText("Quick Checks").assertIsDisplayed()
+        composeRule.onNodeWithText("Tools").performClick()
+        composeRule.onNodeWithText("Security Tools").assertIsDisplayed()
     }
 }

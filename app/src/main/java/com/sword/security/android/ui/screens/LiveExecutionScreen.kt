@@ -1,13 +1,16 @@
 package com.sword.security.android.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -22,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.sword.security.android.core.i18n.SwordStrings
 import com.sword.security.android.core.model.ExecutionProgress
 import com.sword.security.android.core.model.ExecutionStatus
 import com.sword.security.android.ui.components.SectionHeader
@@ -30,37 +34,31 @@ import com.sword.security.android.ui.components.SwordCard
 import com.sword.security.android.ui.components.SwordCircuitBackdrop
 import com.sword.security.android.ui.components.SwordTopBar
 import com.sword.security.android.ui.components.TerminalOutputBox
-import com.sword.security.android.ui.theme.SwordBackground
-import com.sword.security.android.ui.theme.SwordBorder
-import com.sword.security.android.ui.theme.SwordDeepNavy
-import com.sword.security.android.ui.theme.SwordError
-import com.sword.security.android.ui.theme.SwordPrimaryCyan
-import com.sword.security.android.ui.theme.SwordSuccess
-import com.sword.security.android.ui.theme.SwordTextPrimary
-import com.sword.security.android.ui.theme.SwordTextSecondary
-import com.sword.security.android.ui.theme.SwordWarning
+import com.sword.security.android.ui.theme.LocalSwordColors
 
 @Composable
 fun LiveExecutionScreen(
     progress: ExecutionProgress,
+    languageCode: String = "en",
     onBack: () -> Unit,
     onCancelTask: (String) -> Unit,
     onOpenReports: () -> Unit
 ) {
+    val swordColors = LocalSwordColors.current
     val statusColor = when (progress.status) {
-        ExecutionStatus.RUNNING -> SwordPrimaryCyan
-        ExecutionStatus.COMPLETED -> SwordSuccess
-        ExecutionStatus.CANCELLED -> SwordWarning
-        ExecutionStatus.FAILED -> SwordError
-        ExecutionStatus.IDLE -> SwordTextSecondary
+        ExecutionStatus.RUNNING -> swordColors.accent
+        ExecutionStatus.COMPLETED -> swordColors.success
+        ExecutionStatus.CANCELLED -> swordColors.warning
+        ExecutionStatus.FAILED -> swordColors.error
+        ExecutionStatus.IDLE -> swordColors.textSecondary
     }
 
     Scaffold(
-        containerColor = SwordBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             SwordTopBar(
-                title = "Live Execution",
-                subtitle = progress.toolName.ifBlank { "Execution Engine" },
+                title = SwordStrings.label("live_execution", languageCode),
+                subtitle = progress.toolName.ifBlank { "Sword" },
                 onBack = onBack
             )
         }
@@ -80,14 +78,15 @@ fun LiveExecutionScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Status: ${progress.status.name}",
+                            text = progress.status.name,
                             style = MaterialTheme.typography.titleMedium,
                             color = statusColor
                         )
                         if (progress.taskId.isNotBlank()) {
                             Text(
-                                text = "Task #${progress.taskId}",
-                                style = MaterialTheme.typography.labelSmall
+                                text = "#${progress.taskId}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = swordColors.textSecondary
                             )
                         }
                     }
@@ -96,28 +95,33 @@ fun LiveExecutionScreen(
                         progress = { progress.progressFraction.coerceIn(0f, 1f) },
                         modifier = Modifier.fillMaxWidth(),
                         color = statusColor,
-                        trackColor = SwordBorder
+                        trackColor = swordColors.border
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = progress.stageMessage.ifBlank { "Ready" },
+                        text = progress.stageMessage.ifBlank { "..." },
                         style = MaterialTheme.typography.bodyMedium,
-                        color = SwordTextPrimary
+                        color = swordColors.textPrimary
                     )
 
                     if (progress.status == ExecutionStatus.RUNNING && progress.taskId.isNotBlank()) {
                         Spacer(Modifier.height(10.dp))
                         OutlinedButton(
                             onClick = { onCancelTask(progress.taskId) },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .defaultMinSize(minHeight = 48.dp),
+                            border = BorderStroke(1.dp, swordColors.error.copy(alpha = 0.6f))
                         ) {
-                            Text("Cancel Running Task", color = SwordError)
+                            Text(SwordStrings.label("cancel_task", languageCode), color = swordColors.error)
                         }
                     }
                 }
 
                 if (progress.liveLogs.isNotEmpty()) {
-                    SectionHeader(title = "Execution Log Stream")
+                    SectionHeader(
+                        title = if (SwordStrings.isPersian(languageCode)) "گزارش زنده مراحل" else "Progress Log"
+                    )
                     TerminalOutputBox(text = progress.liveLogs.joinToString("\n"))
                 }
 
@@ -129,16 +133,20 @@ fun LiveExecutionScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Execution Summary", style = MaterialTheme.typography.titleMedium, color = SwordPrimaryCyan)
+                            Text(
+                                text = SwordStrings.label("execution_summary", languageCode),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = swordColors.accent
+                            )
                             SeverityBadge(result.highestSeverity.label)
                         }
                         Spacer(Modifier.height(6.dp))
-                        Text("Target: ${result.targetSummary}", style = MaterialTheme.typography.bodyMedium, color = SwordTextPrimary)
-                        Text("Duration: ${result.durationMs} ms", style = MaterialTheme.typography.labelSmall)
+                        Text(result.targetSummary, style = MaterialTheme.typography.bodyMedium, color = swordColors.textPrimary)
+                        Text("${result.durationMs} ms", style = MaterialTheme.typography.labelSmall, color = swordColors.textSecondary)
                     }
 
                     if (result.findings.isNotEmpty()) {
-                        SectionHeader(title = "Findings (${result.findings.size})")
+                        SectionHeader(title = "${SwordStrings.label("findings", languageCode)} (${result.findings.size})")
                         result.findings.forEach { finding ->
                             SwordCard {
                                 Row(
@@ -149,23 +157,27 @@ fun LiveExecutionScreen(
                                     Text(
                                         text = finding.title,
                                         style = MaterialTheme.typography.titleMedium,
+                                        color = swordColors.textPrimary,
                                         modifier = Modifier.weight(1f)
                                     )
+                                    Spacer(Modifier.width(8.dp))
                                     SeverityBadge(finding.severity)
                                 }
                                 Spacer(Modifier.height(6.dp))
-                                Text(finding.detail, style = MaterialTheme.typography.bodyMedium, color = SwordTextPrimary)
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    text = "Recommendation: ${finding.recommendation}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = SwordPrimaryCyan
-                                )
+                                Text(finding.detail, style = MaterialTheme.typography.bodyMedium, color = swordColors.textPrimary)
+                                if (finding.recommendation.isNotBlank()) {
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = "${SwordStrings.label("recommendation", languageCode)} ${finding.recommendation}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = swordColors.accent
+                                    )
+                                }
                             }
                         }
                     }
 
-                    SectionHeader(title = "Structured Output")
+                    SectionHeader(title = SwordStrings.label("detailed_output", languageCode))
                     TerminalOutputBox(text = result.rawOutput)
 
                     if (result.reportId != null) {
@@ -173,18 +185,15 @@ fun LiveExecutionScreen(
                             onClick = onOpenReports,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(48.dp),
+                                .height(50.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = SwordPrimaryCyan,
-                                contentColor = SwordDeepNavy
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         ) {
                             Text(
-                                text = "View Saved Report in Reports Center",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    color = SwordDeepNavy,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                text = SwordStrings.label("open_reports_center", languageCode),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                             )
                         }
                     }

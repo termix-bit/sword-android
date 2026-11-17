@@ -33,6 +33,18 @@ data class SavedJsonReport(
     val output: String
 )
 
+data class ReportViewerData(
+    val reportMetaId: Long,
+    val jsonFileName: String,
+    val htmlFileName: String,
+    val parsedReport: SavedJsonReport?,
+    val rawJsonText: String,
+    val formattedJsonText: String,
+    val jsonError: String?,
+    val htmlText: String,
+    val htmlError: String?
+)
+
 class ReportStorageManager(private val context: Context) {
 
     private val json = Json { prettyPrint = true }
@@ -86,8 +98,16 @@ class ReportStorageManager(private val context: Context) {
     }
 
     suspend fun readReportJsonText(fileName: String): String = withContext(Dispatchers.IO) {
+        if (fileName.isBlank()) return@withContext ""
         val file = resolveSafeReportFile(fileName)
-        if (!file.exists()) return@withContext ""
+        if (!file.exists() || !file.isFile) return@withContext ""
+        file.readText(Charsets.UTF_8)
+    }
+
+    suspend fun readReportHtmlText(fileName: String): String = withContext(Dispatchers.IO) {
+        if (fileName.isBlank()) return@withContext ""
+        val file = resolveSafeReportFile(fileName)
+        if (!file.exists() || !file.isFile) return@withContext ""
         file.readText(Charsets.UTF_8)
     }
 
@@ -95,6 +115,67 @@ class ReportStorageManager(private val context: Context) {
         val text = readReportJsonText(fileName)
         if (text.isBlank()) return@withContext null
         runCatching { json.decodeFromString<SavedJsonReport>(text) }.getOrNull()
+    }
+
+    suspend fun loadReportViewerData(
+        reportMetaId: Long,
+        jsonFileName: String,
+        htmlFileName: String
+    ): ReportViewerData = withContext(Dispatchers.IO) {
+        var rawJson = ""
+        var formattedJson = ""
+        var parsed: SavedJsonReport? = null
+        var jsonErr: String? = null
+
+        val jsonRead = runCatching { readReportJsonText(jsonFileName) }
+        jsonRead.onSuccess { text ->
+            rawJson = text
+            if (text.isBlank()) {
+                jsonErr = "JSON report file is missing or empty."
+            } else {
+                val trimmed = text.trimStart()
+                val prettyResult = runCatching {
+                    when {
+                        trimmed.startsWith("{") -> org.json.JSONObject(trimmed).toString(2)
+                        trimmed.startsWith("[") -> org.json.JSONArray(trimmed).toString(2)
+                        else -> throw org.json.JSONException("JSON must begin with '{' or '['")
+                    }
+                }
+                prettyResult.onSuccess { pretty ->
+                    formattedJson = pretty
+                    parsed = runCatching { json.decodeFromString<SavedJsonReport>(text) }.getOrNull()
+                }.onFailure { err ->
+                    jsonErr = err.message ?: "Invalid or corrupted JSON content."
+                    formattedJson = text
+                }
+            }
+        }.onFailure { err ->
+            jsonErr = err.message ?: "Failed to read JSON report file."
+        }
+
+        var htmlText = ""
+        var htmlErr: String? = null
+        val htmlRead = runCatching { readReportHtmlText(htmlFileName) }
+        htmlRead.onSuccess { text ->
+            htmlText = text
+            if (text.isBlank()) {
+                htmlErr = "HTML report file is missing or empty."
+            }
+        }.onFailure { err ->
+            htmlErr = err.message ?: "Failed to read HTML report file."
+        }
+
+        ReportViewerData(
+            reportMetaId = reportMetaId,
+            jsonFileName = jsonFileName,
+            htmlFileName = htmlFileName,
+            parsedReport = parsed,
+            rawJsonText = rawJson,
+            formattedJsonText = formattedJson,
+            jsonError = jsonErr,
+            htmlText = htmlText,
+            htmlError = htmlErr
+        )
     }
 
     suspend fun deleteReportFiles(jsonFileName: String, htmlFileName: String) = withContext(Dispatchers.IO) {

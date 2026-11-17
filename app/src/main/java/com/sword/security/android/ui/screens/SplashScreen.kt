@@ -17,23 +17,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sword.security.android.core.i18n.SwordStrings
 import com.sword.security.android.ui.components.SwordCircuitBackdrop
 import com.sword.security.android.ui.components.SwordLogoBadge
-import com.sword.security.android.ui.theme.SwordBorder
-import com.sword.security.android.ui.theme.SwordPrimaryCyan
-import com.sword.security.android.ui.theme.SwordTextPrimary
-import com.sword.security.android.ui.theme.SwordTextSecondary
+import com.sword.security.android.ui.theme.LocalSwordColors
 import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
     animationsEnabled: Boolean,
     onboardingCompleted: Boolean,
+    languageCode: String = "en",
     onNavigateToOnboarding: () -> Unit,
     onNavigateToDashboard: () -> Unit
 ) {
+    val swordColors = LocalSwordColors.current
+    val isFa = SwordStrings.isPersian(languageCode)
+
     LaunchedEffect(onboardingCompleted) {
-        delay(if (animationsEnabled) 900L else 250L)
+        delay(if (animationsEnabled) 750L else 180L)
         if (onboardingCompleted) {
             onNavigateToDashboard()
         } else {
@@ -56,28 +58,28 @@ fun SplashScreen(
                 style = MaterialTheme.typography.displaySmall.copy(
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 6.sp,
-                    color = SwordTextPrimary
+                    color = swordColors.textPrimary
                 )
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "Android Security Toolkit",
+                text = SwordStrings.label("app_subtitle", languageCode),
                 style = MaterialTheme.typography.titleMedium.copy(
-                    color = SwordPrimaryCyan,
-                    letterSpacing = 1.2.sp
+                    color = swordColors.accent,
+                    letterSpacing = 1.sp
                 )
             )
             Spacer(Modifier.height(32.dp))
             LinearProgressIndicator(
                 modifier = Modifier.width(180.dp),
-                color = SwordPrimaryCyan,
-                trackColor = SwordBorder
+                color = swordColors.accent,
+                trackColor = swordColors.border
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "Initializing native engine & capability checks...",
+                text = if (isFa) "در حال آماده‌سازی ابزارها و بررسی قابلیت‌های دستگاه..." else "Initializing engine & device readiness checks...",
                 style = MaterialTheme.typography.labelSmall,
-                color = SwordTextSecondary
+                color = swordColors.textSecondary
             )
         }
     }

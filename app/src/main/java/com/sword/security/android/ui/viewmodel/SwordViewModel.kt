@@ -16,6 +16,7 @@ import com.sword.security.android.data.local.db.EvidenceRecordEntity
 import com.sword.security.android.data.local.db.ReportMetadataEntity
 import com.sword.security.android.data.local.db.ScanRecordEntity
 import com.sword.security.android.data.local.prefs.UserPreferences
+import com.sword.security.android.data.reports.ReportViewerData
 import com.sword.security.android.data.reports.SavedJsonReport
 import com.sword.security.android.data.repository.ModuleRegistry
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,6 +61,12 @@ class SwordViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _selectedReportContent = MutableStateFlow<SavedJsonReport?>(null)
     val selectedReportContent: StateFlow<SavedJsonReport?> = _selectedReportContent.asStateFlow()
+
+    private val _selectedReportViewerData = MutableStateFlow<ReportViewerData?>(null)
+    val selectedReportViewerData: StateFlow<ReportViewerData?> = _selectedReportViewerData.asStateFlow()
+
+    private val _viewerReportMeta = MutableStateFlow<ReportMetadataEntity?>(null)
+    val viewerReportMeta: StateFlow<ReportMetadataEntity?> = _viewerReportMeta.asStateFlow()
 
     private val _statusBanner = MutableStateFlow<String?>(null)
     val statusBanner: StateFlow<String?> = _statusBanner.asStateFlow()
@@ -108,8 +115,36 @@ class SwordViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun loadReportForViewer(report: ReportMetadataEntity) {
+        _viewerReportMeta.value = report
+        viewModelScope.launch {
+            val data = reportStorage.loadReportViewerData(
+                reportMetaId = report.id,
+                jsonFileName = report.jsonFileName,
+                htmlFileName = report.htmlFileName
+            )
+            _selectedReportViewerData.value = data
+            _selectedReportContent.value = data.parsedReport
+        }
+    }
+
+    fun loadReportForViewerById(reportId: Long) {
+        viewModelScope.launch {
+            val meta = allReports.value.firstOrNull { it.id == reportId }
+                ?: db.reportDao().getReportById(reportId)
+            if (meta == null) {
+                _viewerReportMeta.value = null
+                _selectedReportViewerData.value = null
+            } else {
+                loadReportForViewer(meta)
+            }
+        }
+    }
+
     fun clearSelectedReport() {
         _selectedReportContent.value = null
+        _selectedReportViewerData.value = null
+        _viewerReportMeta.value = null
     }
 
     fun getReportShareUri(fileName: String): Uri? = reportStorage.getShareUriForFile(fileName)
@@ -185,6 +220,14 @@ class SwordViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setLanguageCode(code: String) {
         viewModelScope.launch { prefsRepo.setLanguageCode(code) }
+    }
+
+    fun setThemeMode(mode: String) {
+        viewModelScope.launch { prefsRepo.setThemeMode(mode) }
+    }
+
+    fun showStatusMessage(message: String) {
+        _statusBanner.value = message
     }
 
     fun saveProxyUrl(proxy: String) {

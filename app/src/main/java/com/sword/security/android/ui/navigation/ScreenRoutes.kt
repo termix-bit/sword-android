@@ -11,9 +11,11 @@ object ScreenRoutes {
     const val LIVE_EXECUTION = "live_execution"
     const val SCAN_HISTORY = "scan_history"
     const val REPORTS_CENTER = "reports_center"
+    const val REPORT_VIEWER = "report_viewer/{reportId}"
     const val DEVICE_CAPABILITIES = "device_capabilities"
     const val PERMISSIONS_MANAGER = "permissions_manager"
     const val SETTINGS = "settings"
+    const val USER_MANUAL = "user_manual"
     const val ABOUT = "about"
 
     fun modulesRoute(categoryId: String? = null): String =
@@ -21,4 +23,5 @@ object ScreenRoutes {
 
     fun moduleDetailRoute(toolId: String): String = "module_detail/$toolId"
     fun scanConfigRoute(toolId: String): String = "scan_config/$toolId"
+    fun reportViewerRoute(reportId: Long): String = "report_viewer/$reportId"
 }

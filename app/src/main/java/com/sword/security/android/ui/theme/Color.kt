@@ -2,6 +2,7 @@ package com.sword.security.android.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+// Dark palette (original Sword Navy & Cyan identity)
 val SwordBackground = Color(0xFF101820)
 val SwordDeepNavy = Color(0xFF071C2E)
 val SwordCardSurface = Color(0xFF121F2D)
@@ -12,6 +13,21 @@ val SwordTextPrimary = Color(0xFFF0F6FC)
 val SwordTextSecondary = Color(0xFFAAB4C0)
 val SwordBorder = Color(0xFF243747)
 
+// Light palette (high-contrast slate & deep teal/navy accents)
+val SwordLightBackground = Color(0xFFF4F7FA)
+val SwordLightTopBar = Color(0xFFFFFFFF)
+val SwordLightCardSurface = Color(0xFFFFFFFF)
+val SwordLightSurfaceElevated = Color(0xFFE7EEF5)
+val SwordLightPrimary = Color(0xFF006D77)
+val SwordLightPrimaryContainer = Color(0xFFCDEFF2)
+val SwordLightOnPrimaryContainer = Color(0xFF042A2E)
+val SwordLightSecondary = Color(0xFF0A5C70)
+val SwordLightSecondaryContainer = Color(0xFFDCE9F2)
+val SwordLightTextPrimary = Color(0xFF0F1B26)
+val SwordLightTextSecondary = Color(0xFF475869)
+val SwordLightBorder = Color(0xFFC7D4E0)
+
+// Semantic / Severity colors (dark & light accessible variants)
 val SwordSeverityCritical = Color(0xFFFF4D6D)
 val SwordSeverityHigh = Color(0xFFFF8A3D)
 val SwordSeverityMedium = Color(0xFFFFD166)
@@ -20,3 +36,18 @@ val SwordSeverityInfo = Color(0xFF12D5E5)
 val SwordSuccess = Color(0xFF2EE59D)
 val SwordWarning = Color(0xFFFFC857)
 val SwordError = Color(0xFFFF5C77)
+
+val SwordLightSeverityCritical = Color(0xFFB81D3A)
+val SwordLightSeverityHigh = Color(0xFFC25100)
+val SwordLightSeverityMedium = Color(0xFF8C5E00)
+val SwordLightSeverityLow = Color(0xFF006D77)
+val SwordLightSeverityInfo = Color(0xFF005B82)
+val SwordLightSuccess = Color(0xFF0E7A4B)
+val SwordLightWarning = Color(0xFF9A6200)
+val SwordLightError = Color(0xFFB81D3A)
+
+// Terminal / Code surfaces
+val SwordDarkCodeSurface = Color(0xFF0A1219)
+val SwordDarkCodeText = Color(0xFFDCEEF5)
+val SwordLightCodeSurface = Color(0xFFF0F4F8)
+val SwordLightCodeText = Color(0xFF132230)

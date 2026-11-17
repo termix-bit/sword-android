@@ -3,11 +3,13 @@ package com.sword.security.android.ui.screens
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,46 +18,47 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.sword.security.android.core.i18n.SwordHelpContent
+import com.sword.security.android.core.i18n.SwordStrings
 import com.sword.security.android.core.model.ParameterType
 import com.sword.security.android.core.model.ToolDescriptor
 import com.sword.security.android.ui.components.AuthorizationConfirmDialog
+import com.sword.security.android.ui.components.ContextualHelpDialog
+import com.sword.security.android.ui.components.HelpIconButton
 import com.sword.security.android.ui.components.SwordCard
 import com.sword.security.android.ui.components.SwordCircuitBackdrop
+import com.sword.security.android.ui.components.SwordFilterChip
 import com.sword.security.android.ui.components.SwordTopBar
-import com.sword.security.android.ui.theme.SwordBackground
-import com.sword.security.android.ui.theme.SwordBorder
-import com.sword.security.android.ui.theme.SwordCardSurface
-import com.sword.security.android.ui.theme.SwordDeepNavy
-import com.sword.security.android.ui.theme.SwordError
-import com.sword.security.android.ui.theme.SwordPrimaryCyan
-import com.sword.security.android.ui.theme.SwordTextPrimary
-import com.sword.security.android.ui.theme.SwordTextSecondary
+import com.sword.security.android.ui.components.swordOutlinedTextFieldColors
+import com.sword.security.android.ui.theme.LocalSwordColors
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ScanConfigScreen(
     tool: ToolDescriptor,
     requireAuthConfirmation: Boolean,
+    languageCode: String = "en",
     onBack: () -> Unit,
     onExecute: (Map<String, String>) -> Unit
 ) {
+    val swordColors = LocalSwordColors.current
     val paramValues = remember(tool.id) {
         mutableStateMapOf<String, String>().apply {
             tool.parameters.forEach { p -> put(p.key, p.defaultValue) }
@@ -63,6 +66,7 @@ fun ScanConfigScreen(
     }
     var validationError by remember { mutableStateOf<String?>(null) }
     var showConfirmDialog by remember { mutableStateOf(false) }
+    var showHelpDialog by remember { mutableStateOf(false) }
 
     var activeFileParamKey by remember { mutableStateOf<String?>(null) }
     val filePicker = rememberLauncherForActivityResult(
@@ -91,6 +95,14 @@ fun ScanConfigScreen(
         }
     }
 
+    if (showHelpDialog) {
+        ContextualHelpDialog(
+            topic = SwordHelpContent.forTool(tool, languageCode),
+            languageCode = languageCode,
+            onDismiss = { showHelpDialog = false }
+        )
+    }
+
     if (showConfirmDialog) {
         val summary = paramValues.entries
             .filter { it.value.isNotBlank() }
@@ -98,6 +110,7 @@ fun ScanConfigScreen(
         AuthorizationConfirmDialog(
             toolName = tool.name,
             targetSummary = summary,
+            languageCode = languageCode,
             onConfirm = {
                 showConfirmDialog = false
                 onExecute(paramValues.toMap())
@@ -107,12 +120,18 @@ fun ScanConfigScreen(
     }
 
     Scaffold(
-        containerColor = SwordBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             SwordTopBar(
-                title = "Scan Configuration",
+                title = SwordStrings.label("scan_config_title", languageCode),
                 subtitle = tool.name,
-                onBack = onBack
+                onBack = onBack,
+                actions = {
+                    HelpIconButton(
+                        onClick = { showHelpDialog = true },
+                        contentDescription = SwordStrings.label("help", languageCode)
+                    )
+                }
             )
         }
     ) { innerPadding ->
@@ -125,14 +144,15 @@ fun ScanConfigScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 SwordCard {
-                    Text(tool.summary, style = MaterialTheme.typography.bodyLarge)
+                    Text(tool.summary, style = MaterialTheme.typography.bodyLarge, color = swordColors.textPrimary)
                 }
 
                 if (tool.parameters.isEmpty()) {
                     SwordCard {
                         Text(
-                            text = "This diagnostic requires no manual target input and runs directly against local Android system state.",
-                            style = MaterialTheme.typography.bodyMedium
+                            text = SwordStrings.label("no_input_needed", languageCode),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = swordColors.textSecondary
                         )
                     }
                 } else {
@@ -141,26 +161,20 @@ fun ScanConfigScreen(
                             Text(
                                 text = param.label + if (param.required) " *" else "",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = SwordPrimaryCyan
+                                color = swordColors.accent
                             )
                             Spacer(Modifier.height(8.dp))
                             when (param.type) {
                                 ParameterType.SELECT -> {
                                     FlowRow(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         param.options.forEach { option ->
-                                            val selected = paramValues[param.key] == option
-                                            FilterChip(
-                                                selected = selected,
+                                            SwordFilterChip(
+                                                selected = paramValues[param.key] == option,
                                                 onClick = { paramValues[param.key] = option },
-                                                label = { Text(option) },
-                                                colors = FilterChipDefaults.filterChipColors(
-                                                    selectedContainerColor = SwordPrimaryCyan,
-                                                    selectedLabelColor = SwordDeepNavy,
-                                                    labelColor = SwordTextSecondary
-                                                )
+                                                label = option
                                             )
                                         }
                                     }
@@ -168,9 +182,9 @@ fun ScanConfigScreen(
                                 ParameterType.FILE_URI -> {
                                     val currentUri = paramValues[param.key].orEmpty()
                                     Text(
-                                        text = if (currentUri.isBlank()) "No file selected" else currentUri,
+                                        text = currentUri.ifBlank { SwordStrings.label("no_file_selected", languageCode) },
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = if (currentUri.isBlank()) SwordTextSecondary else SwordTextPrimary
+                                        color = if (currentUri.isBlank()) swordColors.textSecondary else swordColors.textPrimary
                                     )
                                     Spacer(Modifier.height(8.dp))
                                     OutlinedButton(
@@ -178,30 +192,36 @@ fun ScanConfigScreen(
                                             activeFileParamKey = param.key
                                             val mime = if (tool.id == "forensics_exif_audit") arrayOf("image/*") else arrayOf("*/*")
                                             filePicker.launch(mime)
-                                        }
+                                        },
+                                        modifier = Modifier.defaultMinSize(minHeight = 48.dp),
+                                        border = BorderStroke(1.dp, swordColors.accent)
                                     ) {
-                                        Text("Pick File via Android SAF", color = SwordPrimaryCyan)
+                                        Text(SwordStrings.label("pick_file_saf", languageCode), color = swordColors.accent)
                                     }
                                 }
                                 else -> {
-                                    OutlinedTextField(
-                                        value = paramValues[param.key].orEmpty(),
-                                        onValueChange = {
-                                            paramValues[param.key] = it
-                                            validationError = null
-                                        },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        placeholder = { Text(param.hint) },
-                                        singleLine = true,
-                                        colors = OutlinedTextFieldDefaults.colors(
-                                            focusedBorderColor = SwordPrimaryCyan,
-                                            unfocusedBorderColor = SwordBorder,
-                                            focusedTextColor = SwordTextPrimary,
-                                            unfocusedTextColor = SwordTextPrimary,
-                                            focusedContainerColor = SwordCardSurface,
-                                            unfocusedContainerColor = SwordCardSurface
-                                        )
+                                    val forceLtr = param.type in listOf(
+                                        ParameterType.URL,
+                                        ParameterType.DOMAIN,
+                                        ParameterType.IP_ADDRESS,
+                                        ParameterType.SUBNET,
+                                        ParameterType.PORT_LIST,
+                                        ParameterType.INTEGER
                                     )
+                                    val fieldDir = if (forceLtr) LayoutDirection.Ltr else LocalLayoutDirection.current
+                                    CompositionLocalProvider(LocalLayoutDirection provides fieldDir) {
+                                        OutlinedTextField(
+                                            value = paramValues[param.key].orEmpty(),
+                                            onValueChange = {
+                                                paramValues[param.key] = it
+                                                validationError = null
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            placeholder = { Text(param.hint) },
+                                            singleLine = true,
+                                            colors = swordOutlinedTextFieldColors()
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -212,7 +232,7 @@ fun ScanConfigScreen(
                     Text(
                         text = validationError!!,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = SwordError
+                        color = swordColors.error
                     )
                 }
 
@@ -223,16 +243,13 @@ fun ScanConfigScreen(
                         .fillMaxWidth()
                         .height(52.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = SwordPrimaryCyan,
-                        contentColor = SwordDeepNavy
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
                     Text(
-                        text = "Start Execution",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            color = SwordDeepNavy,
-                            fontWeight = FontWeight.Bold
-                        )
+                        text = SwordStrings.label("start_execution", languageCode),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }

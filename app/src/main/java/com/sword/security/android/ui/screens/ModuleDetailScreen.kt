@@ -1,9 +1,11 @@
 package com.sword.security.android.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,38 +19,60 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.sword.security.android.core.i18n.SwordHelpContent
+import com.sword.security.android.core.i18n.SwordStrings
 import com.sword.security.android.core.model.CapabilityState
 import com.sword.security.android.core.model.ToolDescriptor
 import com.sword.security.android.ui.components.CapabilityBadge
+import com.sword.security.android.ui.components.ContextualHelpDialog
+import com.sword.security.android.ui.components.ExpandableHelpPanel
+import com.sword.security.android.ui.components.HelpIconButton
 import com.sword.security.android.ui.components.SwordCard
 import com.sword.security.android.ui.components.SwordCircuitBackdrop
 import com.sword.security.android.ui.components.SwordTopBar
-import com.sword.security.android.ui.theme.SwordBackground
-import com.sword.security.android.ui.theme.SwordDeepNavy
-import com.sword.security.android.ui.theme.SwordPrimaryCyan
-import com.sword.security.android.ui.theme.SwordTextPrimary
-import com.sword.security.android.ui.theme.SwordTextSecondary
-import com.sword.security.android.ui.theme.SwordWarning
+import com.sword.security.android.ui.theme.LocalSwordColors
 
 @Composable
 fun ModuleDetailScreen(
     tool: ToolDescriptor,
     capabilityState: CapabilityState,
+    languageCode: String = "en",
     onBack: () -> Unit,
     onConfigureAndRun: () -> Unit,
     onOpenPermissions: () -> Unit
 ) {
+    val swordColors = LocalSwordColors.current
+    var showHelpDialog by remember { mutableStateOf(false) }
+
+    if (showHelpDialog) {
+        ContextualHelpDialog(
+            topic = SwordHelpContent.forTool(tool, languageCode),
+            languageCode = languageCode,
+            onDismiss = { showHelpDialog = false }
+        )
+    }
+
     Scaffold(
-        containerColor = SwordBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             SwordTopBar(
                 title = tool.name,
-                subtitle = tool.category.title,
-                onBack = onBack
+                subtitle = SwordStrings.categoryTitle(tool.category, languageCode),
+                onBack = onBack,
+                actions = {
+                    HelpIconButton(
+                        onClick = { showHelpDialog = true },
+                        contentDescription = SwordStrings.label("help", languageCode)
+                    )
+                }
             )
         }
     ) { innerPadding ->
@@ -66,59 +90,69 @@ fun ModuleDetailScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Device Capability", style = MaterialTheme.typography.titleMedium)
-                        CapabilityBadge(capabilityState)
+                        Text(
+                            text = SwordStrings.label("device_capability", languageCode),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = swordColors.textPrimary
+                        )
+                        CapabilityBadge(capabilityState, languageCode = languageCode)
                     }
                     Spacer(Modifier.height(8.dp))
-                    Text(capabilityState.description, style = MaterialTheme.typography.bodyMedium)
+                    Text(capabilityState.description, style = MaterialTheme.typography.bodyMedium, color = swordColors.textSecondary)
                     if (!tool.staticLimitationReason.isNullOrBlank()) {
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "Platform Note: ${tool.staticLimitationReason}",
+                            text = tool.staticLimitationReason,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = SwordWarning
+                            color = swordColors.warning
                         )
                     }
                 }
 
                 SwordCard {
-                    Text("Module Overview", style = MaterialTheme.typography.titleMedium, color = SwordPrimaryCyan)
-                    Spacer(Modifier.height(6.dp))
-                    Text(tool.description, style = MaterialTheme.typography.bodyLarge)
-                }
-
-                SwordCard {
-                    Text("Sword Reference Compatibility", style = MaterialTheme.typography.titleMedium, color = SwordPrimaryCyan)
-                    Spacer(Modifier.height(6.dp))
                     Text(
-                        text = "Classification: ${tool.compatibility.name.replace('_', ' ')}",
-                        style = MaterialTheme.typography.labelLarge
+                        text = SwordStrings.label("module_overview", languageCode),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = swordColors.accent
                     )
-                    Spacer(Modifier.height(4.dp))
-                    Text(tool.compatibilityNotes, style = MaterialTheme.typography.bodyMedium)
+                    Spacer(Modifier.height(6.dp))
+                    Text(tool.description, style = MaterialTheme.typography.bodyLarge, color = swordColors.textPrimary)
                 }
 
                 if (tool.parameters.isNotEmpty()) {
                     SwordCard {
-                        Text("Required Inputs", style = MaterialTheme.typography.titleMedium, color = SwordPrimaryCyan)
+                        Text(
+                            text = SwordStrings.label("required_inputs", languageCode),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = swordColors.accent
+                        )
                         Spacer(Modifier.height(6.dp))
                         tool.parameters.forEach { param ->
                             Text(
-                                text = "• ${param.label}${if (param.required) " (required)" else " (optional)"}",
+                                text = "• ${param.label}${if (param.required) " *" else ""}",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = SwordTextPrimary
+                                color = swordColors.textPrimary
                             )
                         }
                     }
                 }
 
-                Spacer(Modifier.height(8.dp))
+                ExpandableHelpPanel(
+                    title = SwordStrings.label("technical_notes", languageCode),
+                    body = "${tool.compatibility.name.replace('_', ' ')}: ${tool.compatibilityNotes}",
+                    initiallyExpanded = false
+                )
+
+                Spacer(Modifier.height(4.dp))
                 if (capabilityState == CapabilityState.REQUIRES_PERMISSION) {
                     OutlinedButton(
                         onClick = onOpenPermissions,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultMinSize(minHeight = 48.dp),
+                        border = BorderStroke(1.dp, swordColors.accent)
                     ) {
-                        Text("Open Permissions Manager", color = SwordPrimaryCyan)
+                        Text(SwordStrings.label("open_permissions", languageCode), color = swordColors.accent)
                     }
                 }
 
@@ -133,16 +167,18 @@ fun ModuleDetailScreen(
                         .fillMaxWidth()
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = SwordPrimaryCyan,
-                        contentColor = SwordDeepNavy
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = swordColors.elevatedSurface,
+                        disabledContentColor = swordColors.textSecondary
                     )
                 ) {
                     Text(
-                        text = if (canConfigure) "Configure & Execute" else "Unavailable on This Device",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            color = if (canConfigure) SwordDeepNavy else SwordTextSecondary,
-                            fontWeight = FontWeight.Bold
-                        )
+                        text = SwordStrings.label(
+                            if (canConfigure) "configure_and_run" else "unavailable_device",
+                            languageCode
+                        ),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
