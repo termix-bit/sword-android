@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -62,6 +64,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,6 +77,7 @@ import com.sword.security.android.ui.components.ContextualHelpDialog
 import com.sword.security.android.ui.components.HelpIconButton
 import com.sword.security.android.ui.components.JsonHighlightPalette
 import com.sword.security.android.ui.components.JsonSyntaxHighlighter
+import com.sword.security.android.ui.components.ScanExplanationPanel
 import com.sword.security.android.ui.components.SectionHeader
 import com.sword.security.android.ui.components.SeverityBadge
 import com.sword.security.android.ui.components.SwordCard
@@ -209,7 +213,8 @@ fun ReportViewerScreen(
                 val tabs = listOf(
                     SwordStrings.label("tab_summary", languageCode),
                     SwordStrings.label("tab_json", languageCode),
-                    SwordStrings.label("tab_html", languageCode)
+                    SwordStrings.label("tab_html", languageCode),
+                    SwordStrings.label("tab_explain", languageCode)
                 )
                 TabRow(
                     selectedTabIndex = selectedTab,
@@ -233,6 +238,8 @@ fun ReportViewerScreen(
                             text = {
                                 Text(
                                     text = title,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Medium
                                     )
@@ -339,12 +346,22 @@ fun ReportViewerScreen(
                     }
                 } else {
                     when (selectedTab) {
-                        0 -> ReportSummaryTab(viewerData = viewerData, reportMeta = reportMeta, languageCode = languageCode)
+                        0 -> ReportSummaryTab(
+                            viewerData = viewerData,
+                            reportMeta = reportMeta,
+                            languageCode = languageCode,
+                            onOpenExplainTab = { selectedTab = 3 }
+                        )
                         1 -> ReportJsonTab(
                             viewerData = viewerData,
                             languageCode = languageCode
                         )
-                        else -> ReportHtmlTab(viewerData = viewerData, languageCode = languageCode)
+                        2 -> ReportHtmlTab(viewerData = viewerData, languageCode = languageCode)
+                        else -> ReportExplainTab(
+                            viewerData = viewerData,
+                            reportMeta = reportMeta,
+                            languageCode = languageCode
+                        )
                     }
                 }
             }
@@ -353,10 +370,42 @@ fun ReportViewerScreen(
 }
 
 @Composable
-private fun ReportSummaryTab(
+private fun ReportExplainTab(
     viewerData: ReportViewerData,
     reportMeta: ReportMetadataEntity,
     languageCode: String
+) {
+    val parsed = viewerData.parsedReport
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (parsed == null && viewerData.jsonError != null) {
+            SwordErrorCard(
+                title = SwordStrings.label("explain_error", languageCode),
+                message = viewerData.jsonError
+            )
+            return
+        }
+        ScanExplanationPanel(
+            toolName = parsed?.toolName ?: reportMeta.toolName,
+            targetSummary = parsed?.target ?: reportMeta.targetSummary,
+            findings = parsed?.findings ?: emptyList(),
+            defaultLanguageCode = languageCode,
+            rawOutputAvailable = viewerData.rawJsonText.isNotBlank() || (parsed?.output?.isNotBlank() == true)
+        )
+    }
+}
+
+@Composable
+private fun ReportSummaryTab(
+    viewerData: ReportViewerData,
+    reportMeta: ReportMetadataEntity,
+    languageCode: String,
+    onOpenExplainTab: () -> Unit
 ) {
     val swordColors = LocalSwordColors.current
     val parsed = viewerData.parsedReport
@@ -400,6 +449,27 @@ private fun ReportSummaryTab(
                 style = MaterialTheme.typography.labelSmall,
                 color = swordColors.textSecondary
             )
+            Spacer(Modifier.height(10.dp))
+            OutlinedButton(
+                onClick = onOpenExplainTab,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 48.dp),
+                border = BorderStroke(1.dp, swordColors.accent.copy(alpha = 0.6f))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Translate,
+                    contentDescription = null,
+                    tint = swordColors.accent,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = SwordStrings.label("explain_results", languageCode),
+                    color = swordColors.accent,
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
         }
 
         SectionHeader(title = "${SwordStrings.label("findings", languageCode)} (${parsed.findings.size})")

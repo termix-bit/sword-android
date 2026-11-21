@@ -34,10 +34,10 @@ object SwordManualContent {
             title = "2. Getting Started",
             summary = "You can start using most Sword features right away without changing complex settings.",
             bullets = listOf(
-                "Accept the responsible-use notice on first launch.",
+                "Pick your preferred language (English or Persian) and walk through the brief welcome tutorial on first launch.",
                 "Pick any Quick Check on the Home screen or open the Tools tab to browse all modules.",
                 "Enter the website, domain, IP, text, or file requested and tap Run Check.",
-                "Review findings on screen or open them later from the Reports tab."
+                "Review findings on screen, tap Explain Results for beginner-friendly guidance, or open saved results in the Reports tab."
             )
         ),
         ManualSection(
@@ -129,9 +129,10 @@ object SwordManualContent {
             title = "10. Reports and Exporting",
             summary = "Every completed check saves a structured JSON file and a styled HTML report in Sword's private storage.",
             bullets = listOf(
-                "Tap any report in the Reports tab to open Sword's built-in Report Viewer with three tabs: Summary, JSON, and HTML.",
+                "Tap any report in the Reports tab to open Sword's built-in Report Viewer with four tabs: Summary, JSON, HTML, and Explain.",
                 "JSON tab: Displays syntax-highlighted, indented JSON with a Copy button.",
                 "HTML tab: Renders the full styled report directly inside Sword using a locked-down local WebView (JavaScript and file access disabled).",
+                "Explain tab: Translates structured findings offline on your device into plain English or Persian while preserving IPs, CVEs, domains, ports, and original severity.",
                 "Export / Save lets you save a copy of the JSON or HTML file to Downloads or another folder via Android SAF.",
                 "Share lets you send the HTML or JSON file to another app; Delete removes individual or all reports."
             )
@@ -154,7 +155,7 @@ object SwordManualContent {
             title = "12. Settings and Troubleshooting",
             summary = "Customize appearance, language, timeouts, DNS resolver, and optional proxy—or troubleshoot common issues.",
             bullets = listOf(
-                "Theme & Language: Switch between Dark/Light/System themes and English or Persian (with automatic RTL layout).",
+                "Theme, Language & Replay Tutorial: Switch between Dark/Light/System themes and English or Persian (automatic RTL), or replay the onboarding tutorial anytime at the top of Settings.",
                 "Network Timeout & Concurrency: Increase timeout on slow networks or lower parallel probe limits if routers rate-limit you.",
                 "Encrypted DNS (DoH): Choose Cloudflare, Google, or Quad9.",
                 "Proxy: Enter http://host:port or socks5://host:port if needed, or leave blank and save to disable.",
@@ -194,10 +195,10 @@ object SwordManualContent {
             title = "۲. شروع سریع کار با برنامه",
             summary = "برای استفاده از بیشتر ابزارهای Sword به هیچ تنظیم پیچیده‌ای نیاز ندارید.",
             bullets = listOf(
-                "در اولین ورود، قوانین استفاده مسئولانه را تأیید کنید.",
+                "در اولین ورود، زبان مورد نظر خود (فارسی یا انگلیسی) را انتخاب کنید و آموزش کوتاه شروع را ببینید.",
                 "از صفحه خانه یکی از گزینه‌های «شروع سریع» را بزنید یا وارد تب «ابزارها» شوید.",
                 "آدرس سایت، دامنه، IP، متن یا فایل مورد نظر را وارد کرده و «شروع بررسی» را بزنید.",
-                "نتیجه را همان لحظه ببینید یا بعداً در تب «گزارش‌ها» مطالعه کنید."
+                "نتیجه را همان لحظه ببینید، برای فهم ساده‌تر دکمه «توضیح ساده نتایج» را بزنید یا بعداً در تب «گزارش‌ها» مطالعه کنید."
             )
         ),
         ManualSection(
@@ -289,9 +290,10 @@ object SwordManualContent {
             title = "۱۰. گزارش‌ها و خروجی گرفتن",
             summary = "پس از پایان هر بررسی، یک گزارش JSON و یک گزارش HTML به‌صورت خودکار در فضای خصوصی برنامه ذخیره می‌شود.",
             bullets = listOf(
-                "با لمس هر گزارش در تب «گزارش‌ها»، نمایشگر داخلی Sword با سه تب «خلاصه»، «JSON» و «HTML» باز می‌شود.",
+                "با لمس هر گزارش در تب «گزارش‌ها»، نمایشگر داخلی Sword با چهار تب «خلاصه»، «JSON»، «HTML» و «توضیح ساده» باز می‌شود.",
                 "تب JSON: نمایش کد قالب‌بندی‌شده و رنگی با دکمه کپی.",
                 "تب HTML: نمایش مستقیم صفحه گزارش داخل برنامه با WebView ایمن (بدون جاوااسکریپت و بدون دسترسی به فایل‌های دیگر).",
+                "تب توضیح ساده: توضیح یافته‌های فنی را به‌صورت کاملاً آفلاین روی گوشی به فارسی یا انگلیسی ساده بدون تغییر داده‌های اصلی نمایش می‌دهد.",
                 "گزینه «ذخیره فایل» امکان ذخیره کپی گزارش JSON یا HTML در پوشه دلخواه گوشی را می‌دهد.",
                 "گزینه «اشتراک‌گذاری» برای ارسال فایل گزارش و «حذف» برای پاک کردن گزارش‌ها در دسترس است."
             )
@@ -314,7 +316,7 @@ object SwordManualContent {
             title = "۱۲. تنظیمات و رفع اشکال",
             summary = "تنظیم ظاهر، زبان، مهلت انتظار، DNS امن، پراکسی اختیاری و راه‌حل خطاهای رایج.",
             bullets = listOf(
-                "تم و زبان: انتخاب بین حالت تیره، روشن یا مطابق سیستم و تغییر زبان بین انگلیسی و فارسی (با راست‌به‌چپ خودکار).",
+                "تم، زبان و نمایش دوباره آموزش: انتخاب بین حالت تیره، روشن یا مطابق سیستم، تغییر زبان انگلیسی/فارسی (با راست‌به‌چپ خودکار) یا مرور دوباره راهنمای شروع از بالای صفحه تنظیمات.",
                 "مهلت انتظار و هم‌زمانی: در اینترنت کند مهلت انتظار را بیشتر کنید و در صورت محدودیت روتر، تعداد درخواست هم‌زمان را کم کنید.",
                 "DNS امن (DoH): انتخاب بین Cloudflare، Google یا Quad9.",
                 "پراکسی: فقط در صورت نیاز آدرس پراکسی را وارد کنید؛ برای اتصال مستقیم کادر را خالی کرده و ذخیره بزنید.",

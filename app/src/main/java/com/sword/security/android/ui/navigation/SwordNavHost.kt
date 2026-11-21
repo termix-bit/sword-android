@@ -263,7 +263,7 @@ fun SwordNavHost(viewModel: SwordViewModel) {
                             onboardingCompleted = prefs.onboardingCompleted,
                             languageCode = prefs.languageCode,
                             onNavigateToOnboarding = {
-                                navController.navigate(ScreenRoutes.ONBOARDING) {
+                                navController.navigate(ScreenRoutes.onboardingRoute(replay = false)) {
                                     popUpTo(ScreenRoutes.SPLASH) { inclusive = true }
                                 }
                             },
@@ -275,15 +275,32 @@ fun SwordNavHost(viewModel: SwordViewModel) {
                         )
                     }
 
-                    composable(ScreenRoutes.ONBOARDING) {
-                        OnboardingScreen(
-                            languageCode = prefs.languageCode,
-                            onGetStarted = {
+                    composable(
+                        route = ScreenRoutes.ONBOARDING_WITH_REPLAY,
+                        arguments = listOf(
+                            navArgument("replay") {
+                                type = NavType.BoolType
+                                defaultValue = false
+                            }
+                        )
+                    ) { backStackEntry ->
+                        val isReplay = backStackEntry.arguments?.getBoolean("replay") ?: false
+                        val completeOrExit: () -> Unit = {
+                            if (isReplay) {
+                                navController.popBackStack()
+                            } else {
                                 viewModel.completeOnboarding()
                                 navController.navigate(ScreenRoutes.DASHBOARD) {
-                                    popUpTo(ScreenRoutes.ONBOARDING) { inclusive = true }
+                                    popUpTo(ScreenRoutes.ONBOARDING_WITH_REPLAY) { inclusive = true }
                                 }
                             }
+                        }
+                        OnboardingScreen(
+                            languageCode = prefs.languageCode,
+                            isReplay = isReplay,
+                            onSelectLanguage = viewModel::setLanguageCode,
+                            onFinishOnboarding = completeOrExit,
+                            onSkipOnboarding = completeOrExit
                         )
                     }
 
@@ -513,6 +530,9 @@ fun SwordNavHost(viewModel: SwordViewModel) {
                             onClearAllData = viewModel::clearAllAppData,
                             onResetDefaults = viewModel::resetSettings,
                             onOpenUserManual = { navController.navigate(ScreenRoutes.USER_MANUAL) },
+                            onReplayTutorial = {
+                                navController.navigate(ScreenRoutes.onboardingRoute(replay = true))
+                            },
                             onOpenCapabilities = { navController.navigate(ScreenRoutes.DEVICE_CAPABILITIES) },
                             onOpenPermissions = { navController.navigate(ScreenRoutes.PERMISSIONS_MANAGER) },
                             onOpenAbout = { navController.navigate(ScreenRoutes.ABOUT) }

@@ -179,6 +179,42 @@ object SwordStrings {
             "help_security_note" -> if (isFa) "نکته ایمنی و مسئولانه" else "Important note"
             "manual_search_hint" -> if (isFa) "جستجو در راهنمای کاربر..." else "Search user manual..."
 
+            // Onboarding & Language Selection
+            "onboarding_welcome" -> if (isFa) "به Sword خوش آمدید" else "Welcome to Sword"
+            "onboarding_lang_title" -> if (isFa) "زبان برنامه را انتخاب کنید" else "Choose Your Language"
+            "onboarding_lang_sub" -> if (isFa) "زبان را می‌توانید هر زمان در تنظیمات تغییر دهید." else "You can change your language anytime in Settings."
+            "onboarding_next" -> if (isFa) "بعدی" else "Next"
+            "onboarding_back" -> if (isFa) "قبلی" else "Back"
+            "onboarding_skip" -> if (isFa) "رد کردن" else "Skip"
+            "onboarding_finish" -> if (isFa) "شروع کار با برنامه" else "Finish"
+            "replay_tutorial" -> if (isFa) "نمایش دوباره راهنمای شروع" else "Replay Tutorial"
+            "replay_tutorial_sub" -> if (isFa) "مرور دوباره انتخاب زبان و آموزش کوتاه بخش‌های برنامه" else "Walk through language setup and the beginner tour again"
+
+            // Scan Result Translator & Explanations
+            "tab_explain" -> if (isFa) "توضیح ساده" else "Explain"
+            "explain_results" -> if (isFa) "توضیح ساده نتایج" else "Explain Results"
+            "hide_explanation" -> if (isFa) "بستن توضیح ساده" else "Hide Explanation"
+            "explain_privacy_note" -> if (isFa) {
+                "توضیح به‌صورت کاملاً آفلاین روی دستگاه ساخته می‌شود — داده‌های اصلی، شدت هشدار و خروجی گزارش تغییر نمی‌کنند."
+            } else {
+                "Explained offline on your device — original findings, severity, and report data stay unchanged."
+            }
+            "explain_lang_label" -> if (isFa) "زبان توضیح" else "Explanation Language"
+            "explain_original_title" -> if (isFa) "عنوان فنی اصلی:" else "Original finding:"
+            "explain_what_it_means" -> if (isFa) "این یافته یعنی چه؟" else "What it means"
+            "explain_why_it_matters" -> if (isFa) "چرا مهم است؟" else "Why it matters"
+            "explain_impact" -> if (isFa) "تأثیر امنیتی احتمالی" else "Potential security impact"
+            "explain_next_steps" -> if (isFa) "گام‌های پیشنهادی" else "Recommended next steps"
+            "explain_identifiers" -> if (isFa) "شناسه‌ها و مقادیر فنی حفظ‌شده:" else "Preserved technical details:"
+            "explain_limitation_title" -> if (isFa) "محدودیت توضیح" else "Explanation Note"
+            "explain_no_findings" -> if (isFa) {
+                "یافته ساختاریافته‌ای برای توضیح وجود ندارد. می‌توانید خروجی اصلی گزارش را در تب خلاصه یا JSON ببینید."
+            } else {
+                "No structured findings were recorded to explain. You can inspect the raw output in Summary or JSON."
+            }
+            "explain_loading" -> if (isFa) "در حال آماده‌سازی توضیح ساده..." else "Preparing plain-language explanation..."
+            "explain_error" -> if (isFa) "امکان آماده‌سازی توضیح برای این گزارش وجود ندارد." else "Unable to prepare an explanation for this result."
+
             else -> key
         }
     }

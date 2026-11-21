@@ -17,7 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -75,6 +76,7 @@ fun SettingsScreen(
     onClearAllData: () -> Unit,
     onResetDefaults: () -> Unit,
     onOpenUserManual: () -> Unit,
+    onReplayTutorial: () -> Unit = {},
     onOpenCapabilities: () -> Unit,
     onOpenPermissions: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -166,7 +168,7 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(
-                                imageVector = Icons.Default.MenuBook,
+                                imageVector = Icons.AutoMirrored.Filled.MenuBook,
                                 contentDescription = null,
                                 tint = swordColors.accent
                             )
@@ -429,6 +431,34 @@ fun SettingsScreen(
                 // System & Info
                 item {
                     SectionHeader(title = SwordStrings.label("system_help_section", lang))
+                }
+
+                item {
+                    SwordCard(onClick = onReplayTutorial) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Replay,
+                                contentDescription = null,
+                                tint = swordColors.accent
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = SwordStrings.label("replay_tutorial", lang),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = swordColors.textPrimary
+                                )
+                                Text(
+                                    text = SwordStrings.label("replay_tutorial_sub", lang),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = swordColors.textSecondary
+                                )
+                            }
+                        }
+                    }
                 }
 
                 item {

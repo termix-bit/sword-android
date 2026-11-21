@@ -3,6 +3,7 @@ package com.sword.security.android.ui.navigation
 object ScreenRoutes {
     const val SPLASH = "splash"
     const val ONBOARDING = "onboarding"
+    const val ONBOARDING_WITH_REPLAY = "onboarding?replay={replay}"
     const val DASHBOARD = "dashboard"
     const val MODULES = "modules"
     const val MODULES_WITH_CAT = "modules?category={category}"
@@ -17,6 +18,9 @@ object ScreenRoutes {
     const val SETTINGS = "settings"
     const val USER_MANUAL = "user_manual"
     const val ABOUT = "about"
+
+    fun onboardingRoute(replay: Boolean = false): String =
+        if (replay) "onboarding?replay=true" else "onboarding?replay=false"
 
     fun modulesRoute(categoryId: String? = null): String =
         if (categoryId.isNullOrBlank()) MODULES else "modules?category=$categoryId"

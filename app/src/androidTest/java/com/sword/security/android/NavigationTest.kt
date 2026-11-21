@@ -15,18 +15,18 @@ class NavigationTest {
     @Test
     fun appLaunchesAndNavigatesToDashboardAndModules() {
         composeRule.waitUntil(timeoutMillis = 5_000) {
-            composeRule.onAllNodes(androidx.compose.ui.test.hasText("Acknowledge & Enter Toolkit"))
+            composeRule.onAllNodes(androidx.compose.ui.test.hasText("Skip"))
                 .fetchSemanticsNodes().isNotEmpty() ||
                 composeRule.onAllNodes(androidx.compose.ui.test.hasText("Quick Checks"))
                     .fetchSemanticsNodes().isNotEmpty()
         }
 
-        val onboardingButtons = composeRule.onAllNodes(
-            androidx.compose.ui.test.hasText("Acknowledge & Enter Toolkit")
+        val skipButtons = composeRule.onAllNodes(
+            androidx.compose.ui.test.hasText("Skip")
         ).fetchSemanticsNodes()
 
-        if (onboardingButtons.isNotEmpty()) {
-            composeRule.onNodeWithText("Acknowledge & Enter Toolkit").performClick()
+        if (skipButtons.isNotEmpty()) {
+            composeRule.onNodeWithText("Skip").performClick()
         }
 
         composeRule.onNodeWithText("Quick Checks").assertIsDisplayed()
