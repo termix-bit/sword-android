@@ -1,30 +1,202 @@
-# Sword Android — Android Security Toolkit
+# ⚔️ Sword Android — Native Android Security Toolkit
 
-**Sword Android** is an independent, native Android cybersecurity diagnostic, OSINT, cryptography, and digital forensics toolkit built with **Kotlin**, **Jetpack Compose**, **Material 3**, **Room**, **DataStore**, **OkHttp**, and an optional **Chaquopy Embedded Python 3.10** runtime.
+<p align="center">
+  <strong>A standalone Android cybersecurity toolkit.</strong>
+  <br />
+  Built with Kotlin, Jetpack Compose, and embedded Python.
+</p>
 
-> **Product Family**
-> - **Sword Termux** — Terminal Security Framework
-> - **Sword Linux** — Desktop/Server Security Suite
-> - **Sword Android** — Native Android Security Toolkit *(this repository)*
+<p align="center">
+  <a href="https://github.com/termix-bit/sword-android/releases/latest">
+    <img src="https://img.shields.io/github/v/release/termix-bit/sword-android?label=Latest%20Release&color=8A63D2" alt="Latest Release" />
+  </a>
+  <img src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white" alt="Android 8.0+" />
+  <img src="https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin" />
+  <img src="https://img.shields.io/badge/Python-3.10-3776AB?logo=python&logoColor=white" alt="Python 3.10" />
+  <img src="https://img.shields.io/badge/Status-First%20Release-8A63D2" alt="Release status" />
+</p>
 
-Sword Android is **not** a WebView wrapper or a Termux frontend. It is engineered from the ground up around Android's security sandbox, Scoped Storage (SAF), `ConnectivityManager` / `WifiManager`, `ExifInterface`, and encrypted DNS-over-HTTPS (DoH).
+---
+
+## Overview
+
+**Sword Android** is an independent, native Android cybersecurity diagnostic, OSINT, cryptography, and digital forensics toolkit.
+
+Built with Kotlin, Jetpack Compose, Material 3, Room, DataStore, OkHttp, and an embedded Python 3.10 runtime powered by Chaquopy.
+
+Sword Android is designed as a standalone application. It does not require Termux, a separately installed Python environment, or a command-line setup.
+
+It is not a WebView wrapper or a Termux frontend. The application is built around Android's native APIs, security sandbox, Scoped Storage, and permission model.
+
+### Sword Product Family
+
+Sword is being developed as a family of independent security tools:
+
+| Project | Platform | Description |
+|---|---|---|
+| [Sword Termux](https://github.com/termix-bit/sword) | Android / Termux | Modular terminal-based security framework |
+| **Sword Android** | Android | Standalone native Android security toolkit |
+| Sword Linux | Linux | Dedicated desktop and server security suite — in development |
+
+---
+
+## Download
+
+### Latest Release — v1.0.0
+
+<p align="center">
+  <a href="https://github.com/termix-bit/sword-android/releases/latest">
+    <img src="https://img.shields.io/badge/Download-Sword%20Android%20v1.0.0-8A63D2?style=for-the-badge&logo=android&logoColor=white" alt="Download Sword Android" />
+  </a>
+</p>
+
+**Download page:**  
+https://github.com/termix-bit/sword-android/releases/latest
+
+To install:
+
+1. Open the Releases page.
+2. Download the `app-release.apk` asset.
+3. Open the downloaded APK on your Android device.
+4. If prompted, allow your browser or file manager to install unknown apps.
+5. Complete installation and launch Sword Android.
+
+> Download APK files only from the official Sword Android GitHub Releases page.
+
+### Verify the Download
+
+Each release includes a SHA-256 checksum file.
+
+To verify the downloaded APK on Windows PowerShell:
+
+```powershell
+Get-FileHash .\app-release.apk -Algorithm SHA256
+```
+
+Compare the resulting hash with the value in `app-release.apk.sha256`.
+
+On Linux:
+
+```bash
+sha256sum -c app-release.apk.sha256
+```
+
+---
+
+## Android Compatibility
+
+| Requirement | Configuration |
+|---|---|
+| Minimum Android version | Android 8.0 Oreo |
+| Minimum SDK | API 26 |
+| Compile SDK | API 35 |
+| Target SDK | API 35 |
+| Embedded Python | Python 3.10 |
+| Java target | Java 17 |
+
+### Supported CPU Architectures
+
+- `arm64-v8a`
+- `armeabi-v7a`
+- `x86_64`
+
+Android versions newer than Android 15 may also run the application. Compatibility should be verified on actual devices.
+
+`targetSdk 35` does not impose Android 15 as the maximum supported version.
 
 ---
 
 ## Core Capabilities
 
-- **Network**: Interface & `LinkProperties` inspection, RFC 8484 DNS-over-HTTPS lookup (`A`, `AAAA`, `MX`, `TXT`, `NS`, `CNAME`, `SOA`), connectivity & TCP RTT latency benchmark, bounded authorized TCP port probe (up to 64 ports), and authorized local `/24` LAN discovery.
-- **Web Security**: HTTP security header analyzer (`HSTS`, `CSP`, `X-Frame-Options`, `X-Content-Type-Options`, cookie flags), X.509 TLS certificate & cipher inspector, and passive website configuration audit (`/.well-known/security.txt`, `/robots.txt`).
-- **OSINT**: HTTPS RDAP/WHOIS domain lookup, HTTPS IP & ASN intelligence, SPF/DMARC/MX email DNS posture audit, and rate-limited username availability checks powered by bundled Python 3.10 and the WhatsMyName dataset (`CC BY-SA 4.0`).
-- **Wireless Information**: Active Wi-Fi connection diagnostics and nearby AP security scan (`WifiManager`) with full Android Location/Nearby Wi-Fi permission transparency and throttling awareness.
-- **Cryptography**: SHA-256 / SHA-512 digest generation (legacy MD5/SHA-1 flagged), constant-time hash verification, Base64/Hex/URL/ROT13 utilities, and `SecureRandom` token generator.
-- **Forensics**: Android SAF file metadata & magic-byte signature detector, streaming chain-of-custody SHA-256/512 hashing persisted to Room, `ExifInterface` GPS/device privacy audit, and memory-bounded hex dump + printable strings extractor.
-- **Reports & Persistence**: Room database for scan history, report metadata, forensics evidence records, and activity logs; app-private JSON & Sword-branded HTML report generation, SAF export, FileProvider sharing, and one-tap deletion.
-- **Device Capabilities & Permissions Manager**: Live detection of Android API level, transport/VPN state, Location Services, runtime permissions, root binary presence (optional, non-required), and Chaquopy Python 3.10 health.
+### Network
+- Network interface and `LinkProperties` inspection.
+- DNS-over-HTTPS lookups using RFC 8484.
+- DNS record inspection: A, AAAA, MX, TXT, NS, CNAME, and SOA.
+- Connectivity and TCP RTT latency benchmarking.
+- Bounded authorized TCP port probing (up to 64 ports).
+- Authorized local `/24` LAN discovery.
+
+### Web Security
+- HTTP security header analysis:
+  - HSTS
+  - CSP
+  - X-Frame-Options
+  - X-Content-Type-Options
+  - Cookie security flags
+- X.509 TLS certificate inspection.
+- TLS cipher inspection.
+- Passive website configuration checks:
+  - `/.well-known/security.txt`
+  - `/robots.txt`
+
+### OSINT
+- HTTPS RDAP/WHOIS domain lookup.
+- IP address and ASN intelligence.
+- SPF, DMARC, and MX email DNS posture checks.
+- Rate-limited username availability checks.
+- Bundled WhatsMyName dataset.
+
+### Wireless Information
+- Active Wi-Fi connection diagnostics.
+- Nearby access point security scanning.
+- Android Wi-Fi and Location permission transparency.
+- Permission-aware operation and throttling awareness.
+
+### Cryptography
+- SHA-256 and SHA-512 digest generation.
+- Legacy MD5 and SHA-1 identification.
+- Constant-time hash verification.
+- Base64, Hex, URL, and ROT13 utilities.
+- SecureRandom token generation.
+
+### Forensics
+- Android Storage Access Framework file inspection.
+- File metadata and magic-byte signature detection.
+- Streaming SHA-256 and SHA-512 hashing.
+- Chain-of-custody hash persistence.
+- EXIF GPS and device privacy inspection.
+- Memory-bounded hex dump and printable string extraction.
+
+### Reports and Persistence
+- Room database for scan history and report metadata.
+- Forensics evidence records and activity logs.
+- App-private JSON report generation.
+- Sword-branded HTML reports.
+- Storage Access Framework export.
+- FileProvider sharing.
+- Individual report deletion.
+
+### Device Capabilities and Permissions
+- Android API level detection.
+- Network transport and VPN state inspection.
+- Location Services status.
+- Runtime permission monitoring.
+- Optional root binary presence detection.
+- Embedded Python runtime health checks.
 
 ---
 
-## Project Structure
+## Architecture and Technology
+
+Sword Android uses a native Android architecture with a Kotlin application layer and an embedded Python runtime.
+
+| Component | Technology |
+|---|---|
+| Language | Kotlin |
+| UI | Jetpack Compose |
+| Design system | Material 3 |
+| Local database | Room |
+| Preferences | DataStore |
+| Networking | OkHttp |
+| Python integration | Chaquopy |
+| Embedded Python | Python 3.10 |
+| Serialization | Kotlinx Serialization |
+| Background tasks | WorkManager |
+| Image metadata | AndroidX ExifInterface |
+| Build system | Gradle |
+| Code shrinking | R8 / ProGuard |
+
+### Project Structure
 
 ```text
 Sword-Android/
@@ -34,128 +206,221 @@ Sword-Android/
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
-│       │   ├── python/sword_py/          # Bundled Python 3.10 modules + wmn-data.json
-│       │   ├── res/                      # Sword emblem, adaptive icons, dark navy/cyan theme
+│       │   ├── python/sword_py/
+│       │   ├── res/
 │       │   └── java/com/sword/security/android/
-│       │       ├── core/                 # CapabilityManager, PermissionManager, ExecutionEngine, InputValidator, PythonBridge
-│       │       ├── data/                 # Room DB, DataStore Prefs, ReportStorageManager, ModuleRegistry
-│       │       ├── domain/tools/         # Real Network, Web, OSINT, Wireless, Crypto, Forensics, Custom executors
-│       │       └── ui/                   # Compose Theme, Components, Navigation, ViewModel, 13 Screens
-│       └── test/                         # Unit & Robolectric integration tests
+│       │       ├── core/
+│       │       ├── data/
+│       │       ├── domain/tools/
+│       │       └── ui/
+│       └── test/
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── SECURITY.md
 │   ├── ANDROID_COMPATIBILITY.md
 │   └── KNOWN_LIMITATIONS.md
 ├── THIRD_PARTY_NOTICES.md
-└── gradle/libs.versions.toml
+└── gradle/
+    └── libs.versions.toml
 ```
 
 ---
 
-## Build & Test Instructions
+## Build and Development
 
-### Local Project Setup (Optional)
-You do **not** need to install Android Studio locally when building via GitHub Actions. For optional local CLI builds:
-- **JDK 17** (`openjdk-17-jdk` / Eclipse Temurin 17)
-- **Android SDK Platform 35** & **Build-Tools 35.0.0** (copy `local.properties.example` to `local.properties` and set `sdk.dir=...`)
-- **Python 3.10** (used at build time by Chaquopy 16.0.0; pass `-Psword.buildPython=/path/to/python3.10` if multiple Python versions are installed)
+### Requirements
 
-Make the Gradle Wrapper executable on Linux/macOS if needed:
-```bash
-chmod +x ./gradlew
-```
+For local development:
+
+- JDK 17
+- Android SDK Platform 35
+- Android Build Tools 35.0.0
+- Python 3.10
+- Gradle Wrapper included in the repository
+
+Android Studio is optional. The project can also be built using Gradle from the command line.
 
 ### Run Unit Tests
+
+Linux/macOS:
+
 ```bash
-./gradlew testDebugUnitTest --no-daemon --max-workers=1 -Psword.buildPython=/usr/bin/python3.10
+./gradlew testDebugUnitTest \
+  --no-daemon \
+  --max-workers=1 \
+  -Psword.buildPython=/usr/bin/python3.10
+```
+
+Windows PowerShell:
+
+```powershell
+.\gradlew.bat testDebugUnitTest --no-daemon --max-workers=1
 ```
 
 ### Build Debug APK
+
 ```bash
-./gradlew assembleDebug --no-daemon --max-workers=1 -Psword.buildPython=/usr/bin/python3.10
+./gradlew assembleDebug \
+  --no-daemon \
+  --max-workers=1 \
+  -Psword.buildPython=/usr/bin/python3.10
 ```
-- **APK Output Location**: `app/build/outputs/apk/debug/app-debug.apk`
-- **SHA-256 Checksum**: generated in CI at `app/build/outputs/apk/debug/app-debug.apk.sha256`
+
+Output:
+
+```text
+app/build/outputs/apk/debug/app-debug.apk
+```
+
+### Build Release APK
+
+Release builds use a private signing key supplied through environment variables.
+
+```bash
+./gradlew assembleRelease \
+  --no-daemon \
+  --max-workers=1 \
+  -Psword.buildPython=/usr/bin/python3.10
+```
+
+Output:
+
+```text
+app/build/outputs/apk/release/app-release.apk
+```
+
+A valid release signing configuration is required for a signed release APK.
 
 ---
 
-## GitHub Actions Cloud Build (No Android Studio Required)
+## GitHub Actions and Automated Releases
 
-This repository includes an automated workflow at `.github/workflows/android-build.yml` (**Sword Android CI Build**) that compiles and tests the native Android application on GitHub-hosted `ubuntu-latest` runners.
+Sword Android uses GitHub Actions to automate testing, APK builds, and release publishing.
 
-### What the Workflow Does
-1. Checks out the repository and configures **JDK 17** (Temurin) and **Python 3.10**.
-2. Resolves and verifies the exact Python 3.10 executable path and passes it to Chaquopy via `-Psword.buildPython="$PYTHON310_BIN"`.
-3. Installs **Android SDK Platform 35**, **Build Tools 35.0.0**, and `platform-tools`.
-4. Enables Gradle caching via `gradle/actions/setup-gradle@v4` and limits memory usage with `--no-daemon --max-workers=1`.
-5. Runs `./gradlew testDebugUnitTest` (uploads `sword-android-unit-test-reports` automatically if any test fails).
-6. Builds the debug APK via `./gradlew assembleDebug`.
-7. Verifies `app/build/outputs/apk/debug/app-debug.apk` exists and is non-empty, generates `app-debug.apk.sha256`, and uploads both in the `sword-android-debug-apk` artifact.
+### CI Workflow
 
-### How to Trigger a Build
-- **Automatic**: Push commits or open a Pull Request targeting `main` or `master`.
-- **Manual**:
-  1. Open your repository on GitHub and click the **Actions** tab.
-  2. Select **Sword Android CI Build** in the left sidebar.
-  3. Click **Run workflow**, choose your branch, and click **Run workflow**.
+On pushes to `main` or `master`, and on pull requests targeting those branches, the workflow:
 
-### How to Download APK Artifacts
-1. Open the **Actions** tab and click the completed **Sword Android CI Build** run.
-2. Scroll down to the **Artifacts** section at the bottom of the summary page.
-3. Click **`sword-android-debug-apk`** to download the ZIP containing:
-   - `app-debug.apk`
-   - `app-debug.apk.sha256`
-4. Extract the ZIP and sideload `app-debug.apk` onto your Android device for testing.
+1. Configures JDK 17.
+2. Configures Python 3.10.
+3. Installs Android SDK Platform 35 and Build Tools 35.0.0.
+4. Runs Debug unit tests.
+5. Builds the Debug APK.
+6. Generates a SHA-256 checksum.
+7. Uploads the Debug APK as a workflow artifact.
 
-### SHA-256 Verification
-After extracting the downloaded artifact ZIP, verify the APK integrity against `app-debug.apk.sha256`:
+### Release Workflow
 
-- **Linux / macOS**:
-  ```bash
-  sha256sum -c app-debug.apk.sha256
-  ```
-- **Windows (PowerShell)**:
-  ```powershell
-  Get-FileHash .\app-debug.apk -Algorithm SHA256
-  Get-Content .\app-debug.apk.sha256
-  ```
-  Confirm the computed hash matches the hex digest recorded in `app-debug.apk.sha256` (also printed in the workflow run's **Summary** tab).
+Pushing a version tag matching `v*` triggers the release job.
 
-### How to Inspect Failed Builds
-1. Open the failed run in the GitHub **Actions** tab and click the **`Test & Build Debug APK`** job.
-2. Expand the step marked with a red **X** (e.g. `Run Debug Unit Tests` or `Build Debug APK`) to view the full compiler/Gradle error output.
-3. If unit tests failed, scroll to **Artifacts** and download **`sword-android-unit-test-reports`** (open `index.html` in a browser to inspect failing test stack traces).
+The release job:
 
----
+1. Checks out the tagged source revision.
+2. Configures JDK 17, Python 3.10, and Android SDK.
+3. Decodes the private release keystore from GitHub Actions Secrets into a temporary runner file.
+4. Runs unit tests.
+5. Builds the signed Release APK.
+6. Verifies the APK signature.
+7. Generates a SHA-256 checksum.
+8. Publishes the APK and checksum to GitHub Releases.
 
-## Future Release Signing Instructions
+### Release Signing Secrets
 
-> **Security Notice**: Debug APKs (`app-debug.apk`) are signed with an auto-generated debug key and are intended **for testing only**. Do **not** distribute debug-signed APKs publicly, and **never** commit `.jks` / `.keystore` files, keystore passwords, API secrets, or private credentials to version control.
+The following GitHub repository secrets are required:
 
-Release builds in `app/build.gradle.kts` already enable R8 code shrinking and resource shrinking (`isMinifyEnabled = true`, `isShrinkResources = true`). When you are ready to produce signed release builds via GitHub Actions:
+| Secret | Purpose |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | Base64-encoded private keystore |
+| `ANDROID_KEYSTORE_PASSWORD` | Keystore password |
+| `ANDROID_KEY_ALIAS` | Signing key alias |
+| `ANDROID_KEY_PASSWORD` | Signing key password |
 
-1. **Generate a private release keystore locally** (store it safely offline — never commit it):
-   ```bash
-   keytool -genkeypair -v -keystore sword-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias sword-release
-   ```
-2. **Base64-encode the keystore** for GitHub Secrets:
-   - Linux/macOS: `base64 -w 0 sword-release.jks` (macOS: `base64 -i sword-release.jks | tr -d '\n'`)
-   - Windows PowerShell: `[Convert]::ToBase64String([IO.File]::ReadAllBytes("sword-release.jks"))`
-3. **Add Encrypted Repository Secrets** in GitHub (**Settings -> Secrets and variables -> Actions -> New repository secret**):
-   - `ANDROID_KEYSTORE_BASE64` — Base64 string of `sword-release.jks`
-   - `ANDROID_KEYSTORE_PASSWORD` — Keystore password
-   - `ANDROID_KEY_ALIAS` — Key alias (e.g. `sword-release`)
-   - `ANDROID_KEY_PASSWORD` — Key password
-4. **Configure `signingConfigs` in `app/build.gradle.kts`** to read `KEYSTORE_PATH`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD` from environment variables (or an untracked `keystore.properties` file), then decode `ANDROID_KEYSTORE_BASE64` to a temporary runner file during the release workflow step and run:
-   ```bash
-   ./gradlew assembleRelease --no-daemon --max-workers=1 -Psword.buildPython="$PYTHON310_BIN"
-   ```
-   (or `./gradlew bundleRelease` for Play Store `.aab` bundles), deleting the decoded temporary keystore in an `if: always()` cleanup step.
+The private keystore and passwords must never be committed to source control.
+
+### Publish a New Version
+
+1. Update `versionCode` and `versionName` in `app/build.gradle.kts`.
+2. Commit and push the changes to `main`.
+3. Create a version tag, for example `v1.0.1`.
+4. Push the tag to GitHub.
+5. GitHub Actions builds and publishes the new release.
+
+Release page:
+
+https://github.com/termix-bit/sword-android/releases
 
 ---
 
-## Legal & Authorized Use
+## Security and Responsible Use
 
-Sword Android is strictly intended for education, defensive diagnostics, and authorized security assessments against systems you own or have explicit permission to test.
+Sword Android is intended for educational purposes, defensive diagnostics, and authorized security assessments.
 
+Only test systems, applications, networks, and devices that you own or have explicit permission to assess.
+
+### Android Permissions
+
+Some features require Android runtime permissions or enabled system services.
+
+Wireless scanning behavior depends on Android version, device manufacturer, Wi-Fi hardware, Location Services, and granted permissions.
+
+### Root Access
+
+Root access is not required for the application's basic features.
+
+The application can detect the presence of root-related binaries, but their presence does not mean all privileged operations are supported.
+
+### Privacy
+
+Some OSINT and network features communicate with external services.
+
+Users should review the relevant service terms and avoid submitting sensitive information without authorization.
+
+Scan reports may contain network addresses, targets, and collected metadata. Treat exported reports as potentially sensitive.
+
+---
+
+## Legal Notice
+
+Sword Android is a security education and authorized assessment toolkit.
+
+The user is responsible for obtaining appropriate permission before performing security checks against third-party systems.
+
+The developers are not responsible for misuse or unauthorized activity.
+
+---
+
+## Contributing
+
+Bug reports, documentation improvements, and pull requests are welcome.
+
+When reporting issues, include:
+
+- Android version.
+- Device architecture.
+- Relevant application version.
+- Steps to reproduce the issue.
+- Relevant error logs.
+
+Remove credentials, tokens, private IP information, and other sensitive data before sharing logs.
+
+---
+
+## License
+
+See the repository's `LICENSE` file for licensing terms.
+
+Third-party libraries, tools, and datasets remain subject to their respective licenses and terms. See `THIRD_PARTY_NOTICES.md`.
+
+---
+
+<p align="center">
+  <strong>⚔️ Sword Android</strong>
+  <br />
+  <sub>Independent. Native. Modular.</sub>
+  <br />
+  <a href="https://github.com/termix-bit/sword-android/releases/latest">Download</a>
+  ·
+  <a href="https://github.com/termix-bit/sword-android">Source Code</a>
+  ·
+  <a href="https://github.com/termix-bit/sword-android/issues">Issues</a>
+</p>
