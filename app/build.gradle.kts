@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,6 +7,20 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.chaquopy)
 }
+
+// Release signing credentials are read only from environment variables.
+// Never store passwords or private keystores in source control.
+val releaseKeystorePath = System.getenv("SWORD_KEYSTORE_PATH")
+val releaseKeystorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+val releaseKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
+val releaseKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+
+val hasReleaseSigning = listOf(
+    releaseKeystorePath,
+    releaseKeystorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { !it.isNullOrBlank() }
 
 android {
     namespace = "com.sword.security.android"
@@ -20,6 +35,7 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -29,21 +45,36 @@ android {
         }
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(releaseKeystorePath!!)
+                storePassword = releaseKeystorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
             isMinifyEnabled = false
         }
+
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Release signing must be provided via local keystore.properties or CI env vars.
-            // Never commit private keystores or passwords to source control.
+
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
@@ -78,7 +109,9 @@ android {
 chaquopy {
     defaultConfig {
         version = "3.10"
+
         val customBuildPython = providers.gradleProperty("sword.buildPython").orNull
+
         if (!customBuildPython.isNullOrBlank()) {
             buildPython(customBuildPython)
         } else if (file("/usr/bin/python3.10").exists()) {
@@ -86,6 +119,7 @@ chaquopy {
         } else if (file("/usr/bin/python3").exists()) {
             buildPython("/usr/bin/python3")
         }
+
         // On Windows/macOS, Chaquopy automatically detects py -3.10 / python on PATH.
     }
 }
